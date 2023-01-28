@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vue JS Example</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/css/bootstrap.min.css" integrity="sha384-r4NyP46KrjDleawBgD5tp8Y7UzmLA05oM1iAEQ17CSuDqnUK2+k9luXQOfXJCJ4I" crossorigin="anonymous">
+</head>
+<body>
+    <div id="app">
+        <div class="row">
+            <div class="col">
+                <input 
+                class="form-control"
+                placeholder="Add task here"
+                title="todo" 
+                ref="todoInput"
+                v-model="todo" 
+                v-on:keyup.enter="addTask"
+                type="text" />    
+            </div>
+        </div>
+
+        <h3>Pending</h3>
+        <ul class="list-group">
+            <li 
+                class="list-group-item"
+                v-for="t in getTodoItems(false)">
+                <input 
+                    class="mr-1"
+                    title="Mark as Done"
+                    type="checkbox" 
+                    v-model="t.done"
+                    /> 
+                {{ t.label }}
+            </li>
+        </ul>
+
+
+        <h3>Done</h3>
+        <ul class="list-group">
+            <li 
+                class="list-group-item"
+                v-for="t in getTodoItems(true)">
+                <input 
+                    class="mr-1"
+                    title="Mark as Done"
+                    type="checkbox" 
+                    v-model="t.done"
+                    /> 
+                <s><em>{{ t.label }}</em></s>
+
+                <button
+                    class="btn btn-sm btn-danger ml-1"
+                    @click="deleteTask(t.id)">
+                    Delete
+                </button>
+            </li>
+        </ul>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+    <script>
+        const { createApp, ref } = Vue;
+        const App = {
+            setup() {
+                
+                const lastId = ref(2);
+
+                const todo = ref("");
+                const todos = ref([
+                    {
+                        id: 1,
+                        label: "Buy milk",
+                        done: false
+                    },
+                    {
+                        id: 2,
+                        label: "Buy cookies",
+                        done: true
+                    }
+                ]);
+                const addTask = () => {
+                    if(todo.value) {
+                        lastId.value++;
+                        todos.value.push({
+                            id: lastId.value,
+                            label: todo.value,
+                            done: false
+                        });
+                        todo.value = '';
+                        this.$nextTick(() => {
+                            this.$refs.todoInput.select();
+                        })
+                    }
+                }
+
+                const deleteTask = (id) => {
+                    todos.value = todos
+                                    .value
+                                    .filter(x => x.id !== id);
+                }
+
+                const getTodoItems = (d) => {
+                    return todos.value.filter(x => x.done === d);
+                }
+
+                return {
+                    todo,
+                    todos,
+                    getTodoItems,
+                    addTask,
+                    deleteTask
+                }                
+            }
+        }
+        createApp(App).mount("#app");
+    </script>
+</body>
+</html>

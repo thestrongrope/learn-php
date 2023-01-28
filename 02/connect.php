@@ -3,7 +3,7 @@
 session_start();
 
 $host = 'localhost';
-$db = 'learn';
+$db = 'tsr_account';
 $username = 'root';
 $pass = 'Mahdi@786';
 $charset = 'utf8mb4';

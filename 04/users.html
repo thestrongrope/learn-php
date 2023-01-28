@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vue JS Example</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/css/bootstrap.min.css" integrity="sha384-r4NyP46KrjDleawBgD5tp8Y7UzmLA05oM1iAEQ17CSuDqnUK2+k9luXQOfXJCJ4I" crossorigin="anonymous">
+</head>
+<body>
+    <div id="app">
+        <div>
+            <input 
+                title="Search"
+                class="form-control"
+                placeholder="Search"
+                v-on:keyup.enter="fetchFromServer"
+                v-model="search"
+                type="search" />
+        </div>
+        <table class="table table-striped table-sm table-hover">
+            <tr>
+                <th>Sr No</th>
+                <th>Token</th>
+                <th>Name
+                    <i class="fas fas-sort-down"></i>
+                    <button @click="sortBy='name';sortDir='asc'" v-if="(sortBy!='name') || (sortBy=='name' && sortDir=='desc')"> Asc</button>
+                    <button @click="sortBy='name';sortDir='desc'" v-if="(sortBy=='name' && sortDir=='asc')"> Desc</button>
+                </th>
+                <th>Email
+                    <button @click="sortBy='email';sortDir='asc'" v-if="(sortBy!='email') || (sortBy=='email' && sortDir=='desc')"> Asc</button>
+                    <button @click="sortBy='email';sortDir='desc'" v-if="(sortBy=='email' && sortDir=='asc')"> Desc</button>                    
+                </th>
+                <th>City                    
+                    <button @click="sortBy='city';sortDir='asc'" v-if="(sortBy!='city') || (sortBy=='city' && sortDir=='desc')"> Asc</button>
+                    <button @click="sortBy='city';sortDir='desc'" v-if="(sortBy=='city' && sortDir=='asc')"> Desc</button>
+                </th>
+            </tr>
+            <tr v-for="(u, idx) in users">
+                <td>{{ idx + 1 }}</td>
+                <td>{{ u.token }}</td>
+                <td>{{ u.name }}</td>
+                <td>{{ u.email }}</td>
+                <td>{{ u.city }}</td>
+            </tr>
+        </table>
+
+        <button @click="page=1">First Page</button>
+        <button :disabled="page === 1" @click="page--">Previous Page</button>
+        <button :disabled="page === totalPages"@click="page++">Next Page</button>
+        <button @click="page=totalPages">Last Page</button>
+        Showing Page {{ page }} of {{ totalPages }} - {{ totalCount }} records
+
+        Page Size: 
+        <select title="Page Size" v-model="pageSize">
+            <option>10</option>
+            <option>100</option>
+            <option>200</option>
+        </select>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+    <script>
+        const { createApp, ref } = Vue;
+        const App = {
+            setup() {
+                const apiUrl = "https://localhost/learn-php/02/users-api.php";
+                const users = ref([]);
+                const search = ref("");
+                const page = ref(1);
+                const pageSize = ref(10);
+                const totalCount = ref(0);
+                const totalPages = ref(0);
+                const sortBy = ref('name');
+                const sortDir = ref('asc');
+
+                const createUser = () => {
+                    fetch('https://example.com/profile', {
+                        method: 'POST', // or 'PUT'
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data),
+                    })
+                }
+
+
+                const fetchFromServer = () => {
+                    const usersUrl = `${apiUrl}?page=${page.value}&pageSize=${pageSize.value}&search=${encodeURIComponent(search.value)}&sortBy=${sortBy.value}&sortDir=${sortDir.value}`;
+                    fetch(usersUrl)
+                        .then(x => x.json())
+                        .then(x => {
+                            users.value = x.data;
+                            totalCount.value = x.totalCount;
+                            pageSize.value= x.pageSize;
+                            totalPages.value = x.totalPages;
+                            sortBy.value = x.sortBy,
+                            sortDir.value = x.sortDir
+                        });
+                }
+
+                Vue.watch([pageSize, page, sortBy, sortDir], () => {
+                    fetchFromServer();
+                });
+
+                fetchFromServer();
+
+                return {
+                    users,
+                    page, pageSize, totalCount, totalPages,
+                    sortBy, sortDir,
+                    search,
+                    fetchFromServer
+                }
+            }
+        }
+        createApp(App).mount("#app");
+    </script>
+</body>
+</html>
